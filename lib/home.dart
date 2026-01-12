@@ -27,6 +27,7 @@ class _MyHomePageState extends State<MyHomePage> {
   DateTime _selectedDate = DateTime.now();
   int _selectedSport = 0; // 0 = Tennis, 1 = Pickle Ball
   int _currentBookingPage = 0; // Track current carousel page
+  bool _isBookingSheetOpen = false; // Track if booking sheet is open
 
   @override
   Widget build(BuildContext context) {
@@ -155,243 +156,288 @@ class _MyHomePageState extends State<MyHomePage> {
             spacing: 0,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
-                  'Hi, Rajesh Sharma',
-                  style: TextStyle(
-                    color: secondaryColor,
-                    fontSize: 16,
-                    fontFamily: 'Raleway',
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
-                  'Book a court',
-                  style: TextStyle(
-                    color: textColor,
-                    fontSize: 30,
-                    fontFamily: 'Raleway',
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 5, 0, 10),
-                child: Text(
-                  DateFormat('MMM').format(_selectedDate).toUpperCase(),
-                  style: TextStyle(
-                    color: secondaryColor,
-                    fontSize: 14,
-                    fontFamily: 'Raleway',
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: EasyDateTimeLine(
-                  initialDate: DateTime.now(),
-                  onDateChange: (selectedDate) {
-                    // Limit selection to 7 days from today
-                    final today = DateTime.now();
-                    final maxDate = today.add(const Duration(days: 6));
-
-                    if (selectedDate.isAfter(maxDate) ||
-                        selectedDate.isBefore(today)) {
-                      return; // Ignore dates outside the 7-day range
-                    }
-
-                    setState(() {
-                      _selectedDate = selectedDate;
-                    });
-                  },
-                  headerProps: const EasyHeaderProps(showHeader: false),
-                  timeLineProps: const EasyTimeLineProps(
-                    hPadding: 0,
-                    separatorPadding: 10,
-                  ),
-                  activeColor: accentColor,
-                  dayProps: EasyDayProps(
-                    height: 90,
-                    width: 70,
-
-                    dayStructure: DayStructure.dayStrDayNum,
-                    todayStyle: const DayStyle(
-                      decoration: BoxDecoration(
-                        color: primaryColor,
-                        borderRadius: BorderRadius.all(Radius.circular(25)),
-                      ),
-                      dayNumStyle: TextStyle(
-                        color: textColor,
-                        fontSize: 28,
-                        fontFamily: 'Raleway',
-                        fontWeight: FontWeight.bold,
-                      ),
-                      dayStrStyle: TextStyle(
-                        color: textColor,
-                        fontSize: 16,
-                        fontFamily: 'Raleway',
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                    activeDayStyle: const DayStyle(
-                      decoration: BoxDecoration(
-                        color: accentColor,
-                        borderRadius: BorderRadius.all(Radius.circular(25)),
-                      ),
-                      dayNumStyle: TextStyle(
-                        color: backgroundColor,
-                        fontSize: 28,
-                        fontFamily: 'Raleway',
-                        fontWeight: FontWeight.bold,
-                      ),
-                      dayStrStyle: TextStyle(
-                        color: backgroundColor,
-                        fontSize: 16,
-                        fontFamily: 'Raleway',
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                    inactiveDayStyle: DayStyle(
-                      decoration: BoxDecoration(
-                        color: primaryColor,
-                        border: Border.all(color: secondaryColor, width: 0.2),
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(25),
-                        ),
-                      ),
-                      dayNumStyle: const TextStyle(
-                        color: textColor,
-                        fontSize: 28,
-                        fontFamily: 'Raleway',
-                        fontWeight: FontWeight.bold,
-                      ),
-                      dayStrStyle: const TextStyle(
-                        color: textColor,
-                        fontSize: 16,
-                        fontFamily: 'Raleway',
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-              // Sport Toggle Button
-              Padding(
-                padding: const EdgeInsets.fromLTRB(10, 30, 0, 10),
-                child: Container(
-                  height: 35,
-                  width: 300,
-                  decoration: BoxDecoration(
-                    color: primaryColor,
-                    borderRadius: BorderRadius.circular(25),
-                    border: Border.all(color: Color(0xFF292931)),
-                  ),
-                  child: Stack(
+              // Greeting text - hides when booking sheet is open
+              AnimatedOpacity(
+                opacity: _isBookingSheetOpen ? 0.0 : 1.0,
+                duration: const Duration(milliseconds: 200),
+                child: AnimatedSlide(
+                  offset: _isBookingSheetOpen
+                      ? const Offset(0, -1)
+                      : Offset.zero,
+                  duration: const Duration(milliseconds: 200),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Animated selection indicator
-                      AnimatedAlign(
-                        alignment: _selectedSport == 0
-                            ? Alignment.centerLeft
-                            : Alignment.centerRight,
-                        duration: const Duration(milliseconds: 150),
-                        curve: Curves.easeInOut,
-                        child: FractionallySizedBox(
-                          widthFactor: 0.5,
-                          child: Container(
-                            height: 35,
-
-                            decoration: BoxDecoration(
-                              color: accentColor,
-                              borderRadius: BorderRadius.circular(25),
-                            ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Text(
+                          'Hi, Rajesh Sharma',
+                          style: TextStyle(
+                            color: secondaryColor,
+                            fontSize: 16,
+                            fontFamily: 'Raleway',
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
-                      // Toggle buttons row
-                      Row(
-                        children: [
-                          // Tennis button
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => setState(() => _selectedSport = 0),
-                              behavior: HitTestBehavior.opaque,
-                              child: AnimatedDefaultTextStyle(
-                                duration: const Duration(milliseconds: 50),
-                                style: TextStyle(
-                                  color: _selectedSport == 0
-                                      ? backgroundColor
-                                      : textColor,
-                                  fontSize: 16,
-                                  fontFamily: 'Raleway',
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                child: Center(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.sports_tennis,
-                                        size: 20,
-                                        color: _selectedSport == 0
-                                            ? backgroundColor
-                                            : textColor,
-                                      ),
-                                      const SizedBox(width: 10),
-                                      const Text('Tennis'),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Text(
+                          'Book a court',
+                          style: TextStyle(
+                            color: textColor,
+                            fontSize: 30,
+                            fontFamily: 'Raleway',
+                            fontWeight: FontWeight.bold,
                           ),
-                          // Pickle Ball button
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => setState(() => _selectedSport = 1),
-                              behavior: HitTestBehavior.opaque,
-                              child: AnimatedDefaultTextStyle(
-                                duration: const Duration(milliseconds: 50),
-                                style: TextStyle(
-                                  color: _selectedSport == 1
-                                      ? backgroundColor
-                                      : textColor,
-                                  fontSize: 16,
-                                  fontFamily: 'Raleway',
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    SvgPicture.asset(
-                                      'assets/icons/pickle_ball.svg',
-                                      width: 20,
-                                      height: 20,
-                                      colorFilter: ColorFilter.mode(
-                                        _selectedSport == 1
-                                            ? backgroundColor
-                                            : textColor,
-                                        BlendMode.srcIn,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    const Text('Pickle Ball'),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
+
+              AnimatedSlide(
+                offset: _isBookingSheetOpen
+                    ? const Offset(0, -0.35)
+                    : Offset.zero,
+                duration: const Duration(milliseconds: 200),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 5, 0, 10),
+                      child: Text(
+                        DateFormat('MMM').format(_selectedDate).toUpperCase(),
+                        style: TextStyle(
+                          color: secondaryColor,
+                          fontSize: 14,
+                          fontFamily: 'Raleway',
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ),
+
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: EasyDateTimeLine(
+                        initialDate: DateTime.now(),
+                        onDateChange: (selectedDate) {
+                          // Limit selection to 7 days from today
+                          final today = DateTime.now();
+                          final maxDate = today.add(const Duration(days: 6));
+
+                          if (selectedDate.isAfter(maxDate) ||
+                              selectedDate.isBefore(today)) {
+                            return; // Ignore dates outside the 7-day range
+                          }
+
+                          setState(() {
+                            _selectedDate = selectedDate;
+                          });
+                        },
+                        headerProps: const EasyHeaderProps(showHeader: false),
+                        timeLineProps: const EasyTimeLineProps(
+                          hPadding: 0,
+                          separatorPadding: 10,
+                        ),
+                        activeColor: accentColor,
+                        dayProps: EasyDayProps(
+                          height: 90,
+                          width: 70,
+
+                          dayStructure: DayStructure.dayStrDayNum,
+                          todayStyle: const DayStyle(
+                            decoration: BoxDecoration(
+                              color: primaryColor,
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(25),
+                              ),
+                            ),
+                            dayNumStyle: TextStyle(
+                              color: textColor,
+                              fontSize: 28,
+                              fontFamily: 'Raleway',
+                              fontWeight: FontWeight.bold,
+                            ),
+                            dayStrStyle: TextStyle(
+                              color: textColor,
+                              fontSize: 16,
+                              fontFamily: 'Raleway',
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                          activeDayStyle: const DayStyle(
+                            decoration: BoxDecoration(
+                              color: accentColor,
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(25),
+                              ),
+                            ),
+                            dayNumStyle: TextStyle(
+                              color: backgroundColor,
+                              fontSize: 28,
+                              fontFamily: 'Raleway',
+                              fontWeight: FontWeight.bold,
+                            ),
+                            dayStrStyle: TextStyle(
+                              color: backgroundColor,
+                              fontSize: 16,
+                              fontFamily: 'Raleway',
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                          inactiveDayStyle: DayStyle(
+                            decoration: BoxDecoration(
+                              color: primaryColor,
+                              border: Border.all(
+                                color: secondaryColor,
+                                width: 0.2,
+                              ),
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(25),
+                              ),
+                            ),
+                            dayNumStyle: const TextStyle(
+                              color: textColor,
+                              fontSize: 28,
+                              fontFamily: 'Raleway',
+                              fontWeight: FontWeight.bold,
+                            ),
+                            dayStrStyle: const TextStyle(
+                              color: textColor,
+                              fontSize: 16,
+                              fontFamily: 'Raleway',
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Sport Toggle Button
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(10, 30, 0, 10),
+                      child: Container(
+                        height: 35,
+                        width: 300,
+                        decoration: BoxDecoration(
+                          color: primaryColor,
+                          borderRadius: BorderRadius.circular(25),
+                          border: Border.all(color: Color(0xFF292931)),
+                        ),
+                        child: Stack(
+                          children: [
+                            // Animated selection indicator
+                            AnimatedAlign(
+                              alignment: _selectedSport == 0
+                                  ? Alignment.centerLeft
+                                  : Alignment.centerRight,
+                              duration: const Duration(milliseconds: 150),
+                              curve: Curves.easeInOut,
+                              child: FractionallySizedBox(
+                                widthFactor: 0.5,
+                                child: Container(
+                                  height: 35,
+
+                                  decoration: BoxDecoration(
+                                    color: accentColor,
+                                    borderRadius: BorderRadius.circular(25),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            // Toggle buttons row
+                            Row(
+                              children: [
+                                // Tennis button
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () =>
+                                        setState(() => _selectedSport = 0),
+                                    behavior: HitTestBehavior.opaque,
+                                    child: AnimatedDefaultTextStyle(
+                                      duration: const Duration(
+                                        milliseconds: 50,
+                                      ),
+                                      style: TextStyle(
+                                        color: _selectedSport == 0
+                                            ? backgroundColor
+                                            : textColor,
+                                        fontSize: 16,
+                                        fontFamily: 'Raleway',
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      child: Center(
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.sports_tennis,
+                                              size: 20,
+                                              color: _selectedSport == 0
+                                                  ? backgroundColor
+                                                  : textColor,
+                                            ),
+                                            const SizedBox(width: 10),
+                                            const Text('Tennis'),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                // Pickle Ball button
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () =>
+                                        setState(() => _selectedSport = 1),
+                                    behavior: HitTestBehavior.opaque,
+                                    child: AnimatedDefaultTextStyle(
+                                      duration: const Duration(
+                                        milliseconds: 50,
+                                      ),
+                                      style: TextStyle(
+                                        color: _selectedSport == 1
+                                            ? backgroundColor
+                                            : textColor,
+                                        fontSize: 16,
+                                        fontFamily: 'Raleway',
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          SvgPicture.asset(
+                                            'assets/icons/pickle_ball.svg',
+                                            width: 20,
+                                            height: 20,
+                                            colorFilter: ColorFilter.mode(
+                                              _selectedSport == 1
+                                                  ? backgroundColor
+                                                  : textColor,
+                                              BlendMode.srcIn,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          const Text('Pickle Ball'),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
               Padding(
                 padding: const EdgeInsets.only(left: 20, top: 20),
                 child: Text(
@@ -608,77 +654,462 @@ class _MyHomePageState extends State<MyHomePage> {
             ], //Children of column
           ),
         ),
-        floatingActionButton: Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
+        // FAB - only visible when sheet is closed
+        floatingActionButton: _isBookingSheetOpen
+            ? null
+            : Builder(
+                builder: (scaffoldContext) => Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color.fromARGB(97, 211, 255, 89),
+                        blurRadius: 30,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: SizedBox(
+                    width: 65,
+                    height: 65,
+                    child: FloatingActionButton(
+                      onPressed: () {
+                        setState(() {
+                          _isBookingSheetOpen = true;
+                        });
+                        showBottomSheet(
+                          context: scaffoldContext,
+                          enableDrag: true,
+                          showDragHandle: true,
+                          backgroundColor: primaryColor,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(25),
+                            ),
+                          ),
+                          builder: (context) {
+                            // ignore: sized_box_for_whitespace
+                            return Container(
+                              height: MediaQuery.of(context).size.height * 0.56,
+                              width: MediaQuery.of(context).size.width,
+                              child: Column(
+                                children: [
+                                  Container(
+                                    height: 200,
+                                    width: 354,
+                                    decoration: BoxDecoration(
+                                      color: primaryColor,
+                                      border: Border.all(
+                                        color: secondaryColor,
+                                        width: 3,
+                                      ),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Container(
+                                              //LEFT ALLY
+                                              height: 25,
+                                              width: 174,
+                                              decoration: BoxDecoration(
+                                                color: primaryColor,
+                                                border: Border.all(
+                                                  color: secondaryColor,
+                                                  width: 3,
+                                                ),
+                                              ),
+                                            ),
+                                            Container(
+                                              //RIGHT ALLY
+                                              height: 25,
+                                              width: 174,
+                                              decoration: BoxDecoration(
+                                                color: primaryColor,
+                                                border: Border.all(
+                                                  color: secondaryColor,
+                                                  width: 3,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Container(
+                                              //LEFT No mans Land
+                                              height: 144,
+                                              width: 87,
+                                              decoration: BoxDecoration(
+                                                color: accentColor,
+                                                border: Border.all(
+                                                  color: secondaryColor,
+                                                  width: 2,
+                                                ),
+                                              ),
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: [
+                                                  FilledButton(
+                                                    style: FilledButton.styleFrom(
+                                                      backgroundColor:
+                                                          backgroundColor,
+                                                      shape:
+                                                          const CircleBorder(),
+                                                    ),
+                                                    onPressed: () {},
+                                                    child: Icon(
+                                                      Icons.person,
+                                                      color: accentColor,
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 7),
+                                                ],
+                                              ),
+                                            ),
+                                            Column(
+                                              children: [
+                                                Container(
+                                                  //DEUCE SERVICE BOX
+                                                  height: 72,
+                                                  width: 87,
+                                                  decoration: BoxDecoration(
+                                                    color: primaryColor,
+                                                    border: Border.all(
+                                                      color: secondaryColor,
+                                                      width: 2,
+                                                    ),
+                                                  ),
+                                                  child: Center(
+                                                    child: FilledButton(
+                                                      style: FilledButton.styleFrom(
+                                                        backgroundColor:
+                                                            accentColor,
+                                                        shape:
+                                                            const CircleBorder(),
+                                                      ),
+                                                      onPressed: () {},
+                                                      child: Icon(
+                                                        Icons.add,
+                                                        color: backgroundColor,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Container(
+                                                  height: 72,
+                                                  width: 87,
+                                                  decoration: BoxDecoration(
+                                                    color: primaryColor,
+                                                    border: Border.all(
+                                                      color: secondaryColor,
+                                                      width: 2,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Column(
+                                              children: [
+                                                Container(
+                                                  height: 72,
+                                                  width: 87,
+                                                  decoration: BoxDecoration(
+                                                    color: primaryColor,
+                                                    border: Border.all(
+                                                      color: secondaryColor,
+                                                      width: 2,
+                                                    ),
+                                                  ),
+                                                ),
+                                                Container(
+                                                  height: 72,
+                                                  width: 87,
+                                                  decoration: BoxDecoration(
+                                                    color: primaryColor,
+                                                    border: Border.all(
+                                                      color: secondaryColor,
+                                                      width: 2,
+                                                    ),
+                                                  ),
+                                                  child: Center(
+                                                    child: FilledButton(
+                                                      style: FilledButton.styleFrom(
+                                                        backgroundColor:
+                                                            accentColor,
+                                                        shape:
+                                                            const CircleBorder(),
+                                                      ),
+                                                      onPressed: () {},
+                                                      child: Icon(
+                                                        Icons.add,
+                                                        color: backgroundColor,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Container(
+                                              height: 144,
+                                              width: 87,
+                                              decoration: BoxDecoration(
+                                                color: primaryColor,
+                                                border: Border.all(
+                                                  color: secondaryColor,
+                                                  width: 2,
+                                                ),
+                                              ),
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                children: [
+                                                  SizedBox(height: 7),
+                                                  FilledButton(
+                                                    style: FilledButton.styleFrom(
+                                                      backgroundColor:
+                                                          accentColor,
+                                                      shape:
+                                                          const CircleBorder(),
+                                                    ),
+                                                    onPressed: () {},
+                                                    child: Icon(
+                                                      Icons.add,
+                                                      color: backgroundColor,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Container(
+                                              height: 25,
+                                              width: 174,
+                                              decoration: BoxDecoration(
+                                                color: primaryColor,
+                                                border: Border.all(
+                                                  color: secondaryColor,
+                                                  width: 3,
+                                                ),
+                                              ),
+                                            ),
+                                            Container(
+                                              height: 25,
+                                              width: 174,
+                                              decoration: BoxDecoration(
+                                                color: primaryColor,
+                                                border: Border.all(
+                                                  color: secondaryColor,
+                                                  width: 3,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
 
-            boxShadow: [
-              BoxShadow(
-                color: const Color.fromARGB(97, 211, 255, 89),
-                blurRadius: 30,
-                offset: const Offset(0, 5),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          left: 20,
+                                          top: 20,
+                                          bottom: 10,
+                                        ),
+                                        child: Text(
+                                          'Invited Friends',
+                                          style: TextStyle(
+                                            color: secondaryColor,
+                                            fontSize: 18,
+                                            fontFamily: 'Raleway',
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 25),
+                                    child: Container(
+                                      height: 50,
+                                      width: 350,
+                                      decoration: BoxDecoration(
+                                        color: primaryColor,
+                                        border: Border.all(
+                                          color: secondaryColor,
+                                          width: 1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 20,
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.account_circle_outlined,
+                                                  color: secondaryColor,
+                                                  size: 30,
+                                                ),
+                                                SizedBox(width: 10),
+
+                                                Text(
+                                                  'John Doe',
+                                                  style: TextStyle(
+                                                    color: textColor,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+
+                                            FilledButton(
+                                              style: FilledButton.styleFrom(
+                                                backgroundColor: accentColor,
+                                                shape: const CircleBorder(),
+                                                padding: EdgeInsets.zero,
+                                                minimumSize: Size(25, 25),
+                                                maximumSize: Size(25, 25),
+                                                tapTargetSize:
+                                                    MaterialTapTargetSize
+                                                        .shrinkWrap,
+                                              ),
+                                              onPressed: () {},
+                                              child: Icon(
+                                                Icons.check,
+                                                color: backgroundColor,
+                                                size: 16,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+
+                                  // Continue button
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 40),
+                                    child: SizedBox(
+                                      width: 250,
+                                      height: 40,
+                                      child: FilledButton(
+                                        style: FilledButton.styleFrom(
+                                          backgroundColor: accentColor,
+                                          foregroundColor: backgroundColor,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              25,
+                                            ),
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          // Navigator.of(context).pop(); close drawer
+                                        },
+                                        child: const Text(
+                                          'Continue',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontFamily: 'Raleway',
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ).closed.then((_) {
+                          // Reset state when sheet is dismissed by dragging
+                          setState(() {
+                            _isBookingSheetOpen = false;
+                          });
+                        });
+                      },
+                      elevation: 0,
+                      tooltip: 'New Booking',
+                      shape: const CircleBorder(),
+                      backgroundColor: accentColor,
+                      child: const Icon(Icons.add),
+                    ),
+                  ),
+                ),
               ),
-            ],
-          ),
-          child: SizedBox(
-            width: 65,
-            height: 65,
-            child: FloatingActionButton(
-              onPressed: () {},
-              elevation: 0,
-              tooltip: 'New Booking',
-              shape: const CircleBorder(),
-              backgroundColor: accentColor,
-              child: const Icon(Icons.add),
-            ),
-          ),
-        ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
 
-        bottomNavigationBar: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.only(left: 30, right: 30, bottom: 0),
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              decoration: BoxDecoration(
-                color: const Color(0xFF202025),
-                borderRadius: BorderRadius.circular(25),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color.fromARGB(111, 0, 0, 0),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
+        // Bottom navigation - hidden when booking sheet is open
+        bottomNavigationBar: _isBookingSheetOpen
+            ? null
+            : SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    left: 30,
+                    right: 30,
+                    bottom: 0,
                   ),
-                ],
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF202025),
+                      borderRadius: BorderRadius.circular(25),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color.fromARGB(111, 0, 0, 0),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.home, size: 28),
+                          color: _selectedIndex == 0
+                              ? accentColor
+                              : Colors.white54,
+                          onPressed: () => setState(() => _selectedIndex = 0),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.calendar_month, size: 28),
+                          color: _selectedIndex == 1
+                              ? accentColor
+                              : Colors.white54,
+                          onPressed: () => setState(() => _selectedIndex = 1),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.bar_chart, size: 28),
+                          color: _selectedIndex == 2
+                              ? accentColor
+                              : Colors.white54,
+                          onPressed: () => setState(() => _selectedIndex = 2),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.person, size: 28),
+                          color: _selectedIndex == 3
+                              ? accentColor
+                              : Colors.white54,
+                          onPressed: () => setState(() => _selectedIndex = 3),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.home, size: 28),
-                    color: _selectedIndex == 0 ? accentColor : Colors.white54,
-                    onPressed: () => setState(() => _selectedIndex = 0),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.calendar_month, size: 28),
-                    color: _selectedIndex == 1 ? accentColor : Colors.white54,
-                    onPressed: () => setState(() => _selectedIndex = 1),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.bar_chart, size: 28),
-                    color: _selectedIndex == 2 ? accentColor : Colors.white54,
-                    onPressed: () => setState(() => _selectedIndex = 2),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.person, size: 28),
-                    color: _selectedIndex == 3 ? accentColor : Colors.white54,
-                    onPressed: () => setState(() => _selectedIndex = 3),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }
